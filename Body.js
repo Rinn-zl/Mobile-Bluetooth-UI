@@ -1,56 +1,111 @@
 // Body.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import * as Progress from "react-native-progress";
+import Svg, { Path } from "react-native-svg";
 
 export default function Body() {
-  const [speed, setSpeed] = useState(25); // initial visible speed
-  const [temperature] = useState(73); // current temperature shown in center
+  const [step, setStep] = useState(0); // 0 → 1 → 2 → 3
+  const [temperature, setTemperature] = useState(25);
 
-  // 4-button clicks to get 0 -> 100 (step 25)
-  const step = 25;
-  const inc = () => setSpeed((s) => Math.min(100, s + step));
-  const dec = () => setSpeed((s) => Math.max(0, s - step));
+  // simulate temperature changing every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const randomTemp = 20 + Math.floor(Math.random() * 10); // between 20–30
+      setTemperature(randomTemp);
+    }, 5000);
 
-  // When speed == 0 we show zero colored arc (empty)
-  const progress = speed === 0 ? 0 : speed / 100;
+    return () => clearInterval(interval);
+  }, []);
+
+  const maxSteps = 3;
+  const speed = Math.round((step / maxSteps) * 100); // fan speed %
+
+  const size = 260;
+  const strokeWidth = 16;
+  const radius = (size - strokeWidth) / 2;
+
+  // === Arc config ===
+  const startDeg = -250;
+  const endDeg = -290;
+  const sweepDeg = (endDeg - startDeg + 360) % 360; // total arc span
+  const progressDeg = startDeg + (sweepDeg * step) / maxSteps;
+
+  // === Polar to Cartesian ===
+  const polarToCartesian = (angleDeg) => {
+    const angleRad = (angleDeg * Math.PI) / 180;
+    return {
+      x: size / 2 + radius * Math.cos(angleRad),
+      y: size / 2 + radius * Math.sin(angleRad),
+    };
+  };
+
+  // === Describe Arc Path ===
+  const describeArc = (fromDeg, toDeg) => {
+    const start = polarToCartesian(fromDeg);
+    const end = polarToCartesian(toDeg);
+    const largeArcFlag = Math.abs(toDeg - fromDeg) > 180 ? 1 : 0;
+
+    return [
+      "M",
+      start.x,
+      start.y,
+      "A",
+      radius,
+      radius,
+      0,
+      largeArcFlag,
+      1,
+      end.x,
+      end.y,
+    ].join(" ");
+  };
+
+  const inc = () => setStep((s) => Math.min(maxSteps, s + 1));
+  const dec = () => setStep((s) => Math.max(0, s - 1));
 
   return (
     <View style={styles.container}>
+      {/* Arc progress */}
       <View style={styles.progressWrap}>
-        <Progress.Circle
-          size={230}
-          progress={progress}
-          thickness={14}
-          color="#38bdf8"
-          unfilledColor="#222"
-          borderWidth={0}
-          showsText={false}
-          strokeCap="round"
-          // rotate circle so progress starts at top (12 o'clock)
-          style={{ transform: [{ rotate: "-90deg" }] }}
-        />
+        <Svg width={size} height={size}>
+          {/* Background arc */}
+          <Path
+            d={describeArc(startDeg, endDeg)}
+            stroke="#ccc"
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeLinecap="round"
+          />
+          {/* Progress arc */}
+          {step > 0 && (
+            <Path
+              d={describeArc(startDeg, progressDeg)}
+              stroke="#38bdf8"
+              strokeWidth={strokeWidth}
+              fill="none"
+              strokeLinecap="round"
+            />
+          )}
+        </Svg>
 
-        {/* center overlay (not rotated) */}
+        {/* Center overlay: Temperature */}
         <View style={styles.center}>
           <Text style={styles.tempText}>{temperature}°</Text>
           <Text style={styles.centerLabel}>CURRENT TEMP</Text>
         </View>
-
-        <Text style={[styles.marker, styles.markerLeft]}>50</Text>
-        <Text style={[styles.marker, styles.markerRight]}>90</Text>
       </View>
 
+      {/* Controls */}
       <View style={styles.controls}>
         <TouchableOpacity style={styles.circleBtn} onPress={dec}>
-          <Text style={styles.circleBtnText}>−</Text>
+          <Text style={styles.circleBtnText}>-</Text>
         </TouchableOpacity>
-
         <TouchableOpacity style={styles.circleBtn} onPress={inc}>
           <Text style={styles.circleBtnText}>+</Text>
         </TouchableOpacity>
       </View>
 
+      {/* Fan speed text */}
       <View style={styles.statusRow}>
         <Text style={styles.statusText}>Fan Speed: {speed}%</Text>
       </View>
@@ -59,14 +114,13 @@ export default function Body() {
 }
 
 const styles = StyleSheet.create({
-  // container sits inside the card
   container: {
     flex: 1,
     width: "100%",
+    height: "100%",
     alignItems: "center",
     backgroundColor: "#d7dbe0",
   },
-
   progressWrap: {
     width: 300,
     height: 300,
@@ -74,13 +128,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 12,
   },
-
   center: {
     position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -88,33 +137,18 @@ const styles = StyleSheet.create({
     fontSize: 64,
     fontWeight: "300",
     color: "#111",
-    textShadowColor: "rgba(255,255,255,0.7)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 0,
   },
   centerLabel: {
     marginTop: 4,
     color: "#7f8790",
+    fontSize: 12,
     letterSpacing: 2,
-    fontSize: 12,
   },
-
-  marker: {
-    position: "absolute",
-    top: 18,
-    color: "#7f8790",
-    fontSize: 12,
-  },
-  markerLeft: { left: 18 },
-  markerRight: { right: 18 },
-
   controls: {
     marginTop: 18,
     flexDirection: "row",
-    width: "100%",
     justifyContent: "center",
     gap: 28,
-    paddingHorizontal: 24,
   },
   circleBtn: {
     width: 62,
@@ -123,17 +157,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#6b6f76",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.18,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 4 },
   },
   circleBtnText: {
     color: "#fff",
     fontSize: 28,
     fontWeight: "700",
   },
-
   statusRow: { marginTop: 18, alignItems: "center" },
   statusText: { color: "#7f8790", fontSize: 14 },
 });
