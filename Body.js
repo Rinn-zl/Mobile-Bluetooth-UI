@@ -44,7 +44,24 @@ export default function Body({ power, setPower }) {
 		// Disable other controls when in auto mode
 		setControlsDisabled(newMode === "auto");
 	};
+	const cycleStep = () => {
+		if (!power || controlsDisabled) return;
 
+		const nextStep = (step + 1) % (maxSteps + 1); // 0 → 1 → 2 → 3 → 0
+		setStep(nextStep);
+	};
+
+	useEffect(() => {
+		if (mode === "manual" && power) {
+			setStep(1); // Set fan speed to Low
+		}
+	}, [mode]);
+
+	useEffect(() => {
+		if (mode === "auto" && power && step !== 0) {
+			setStep(0);
+		}
+	}, [mode]);
 	// simulate temperature changing every 5 seconds
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -152,18 +169,7 @@ export default function Body({ power, setPower }) {
 						styles.circleBtn,
 						(!power || controlsDisabled) && { backgroundColor: "#999" },
 					]}
-					onPress={dec}
-					disabled={!power || controlsDisabled}
-				>
-					<Text style={styles.circleBtnText}>-</Text>
-				</TouchableOpacity>
-
-				<TouchableOpacity
-					style={[
-						styles.circleBtn,
-						(!power || controlsDisabled) && { backgroundColor: "#999" },
-					]}
-					onPress={inc}
+					onPress={cycleStep}
 					disabled={!power || controlsDisabled}
 				>
 					<Text style={styles.circleBtnText}>+</Text>

@@ -9,7 +9,7 @@ import Body from "./Body";
 
 export default function App() {
 	const [poweredOn, setPoweredOn] = useState(false);
-	const [showHome, setShowHome] = useState(false);
+	const [showHome, setShowHome] = useState(true);
 
 	return (
 		<View style={styles.appBg}>
