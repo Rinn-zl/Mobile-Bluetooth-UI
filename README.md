@@ -1,10 +1,10 @@
-# 🌬️ Zephyr Mobile UI
+# Zephyr Mobile UI
 
 A minimalist React Native app for controlling a smart fan system with servo sweep, temperature display, and timer-based automation. Designed to interface with a Flask backend running on Raspberry Pi + GrovePi hardware.
 
 ---
 
-## 📱 Features
+## Features
 
 - Fan speed control (Off / Low / Medium / High)
 - Manual and Auto mode switching
@@ -15,18 +15,19 @@ A minimalist React Native app for controlling a smart fan system with servo swee
 
 ---
 
-## 🖼️ Screenshots
+## Screenshots
 
 ![photo_2025-09-19_01-34-05](https://github.com/user-attachments/assets/3689eef7-a5e0-4a1f-8b94-8a755ed6ea89)
 
 ![photo_2025-09-19_01-40-32](https://github.com/user-attachments/assets/5cefc6bd-5e0f-4b7c-bc49-6b8455187e1c)
+
 - Fan speed arc with temperature overlay  
 - Mode toggle and sweep control  
 - Timer input with validation
   
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -41,7 +42,7 @@ git clone https://github.com/yourusername/zephyr-ui.git
 cd zephyr-ui
 npm install
 ```
-## 📦 Expo Guide
+## Expo Guide
 - Zephyr UI is built with Expo, making it easy to run on both Android and iOS.
 - Run the App
 ```bash
@@ -55,9 +56,9 @@ This will open the Expo Dev Tools in your browser.
 - Scan the QR code shown in the terminal or browser
 - The app will load instantly on your device
 
-## 🔗 Backend Integration
+## Backend Integration
 - Ensure the Flask server is running on your Raspberry Pi:
-- You can get the program code from this (https://github.com/Rinn-zl/Zephyr-Backend.git)
+- You can get the program code from this link https://github.com/Rinn-zl/Zephyr-Backend.git
 
 ```bash
 python3 app.py
@@ -68,12 +69,12 @@ const api = axios.create({
   baseURL: "http://<raspberry-pi-ip>:5000",
 });
 ```
-## 🛠️ Customization
+## Customization
 
 - Modify speedLevels in Body.js to adjust fan intensity
 - Tweak sweep angles and timing in backend sweep_servo_step()
 
 
-## ✨ Credits
+## Credits
 - Created by Sai Sai Lin Htet, [Thazin Phyo](https://github.com/Mukimizu), Toe Wai Yan and [Zaw Lin Naing](https://github.com/Rinn-zl) from MIIT University, Mandalay, Myanmar.
 - ~ blending elegant UI with embedded hardware control. Inspired by airflow, simplicity, and seamless interaction.
