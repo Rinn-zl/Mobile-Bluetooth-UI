@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { TextInput } from "react-native";
+import { sendFanSpeed, sendMode} from "./api/func";
 
 export default function Body({ power, setPower }) {
 	const [step, setStep] = useState(0); // 0 → 1 → 2 → 3
@@ -35,12 +36,12 @@ export default function Body({ power, setPower }) {
 		? "Auto: Cooling..."
 		: "Auto: Idle";
 
-	const cycleMode = () => {
+	const cycleMode = async () => {
 		if (!power) return;
 
 		const newMode = mode === "auto" ? "manual" : "auto";
 		setMode(newMode);
-
+		await sendMode(newMode);
 		// Disable other controls when in auto mode
 		setControlsDisabled(newMode === "auto");
 	};
@@ -53,7 +54,9 @@ export default function Body({ power, setPower }) {
 
 	useEffect(() => {
 		if (mode === "manual" && power) {
-			setStep(1); // Set fan speed to Low
+			setStep(1);
+			sendFanSpeed(1);
+			// Set fan speed to Low
 		}
 	}, [mode]);
 
@@ -63,17 +66,7 @@ export default function Body({ power, setPower }) {
 		}
 	}, [mode]);
 	// simulate temperature changing every 5 seconds
-	useEffect(() => {
-		const interval = setInterval(() => {
-			const randomTemp = 20 + Math.floor(Math.random() * 10); // between 20–30
-			setTemperature(randomTemp);
-		}, 5000);
-
-		return () => clearInterval(interval);
-	}, []);
-
-	const maxSteps = 3;
-	const speed = Math.round((step / maxSteps) * 100); // fan speed %
+	const maxSteps = 3; // fan speed
 	const speedLabel = ["Off", "Low", "Medium", "High"][step];
 
 	const size = 260;
@@ -116,9 +109,6 @@ export default function Body({ power, setPower }) {
 		].join(" ");
 	};
 
-	const inc = () => setStep((s) => Math.min(maxSteps, s + 1));
-	const dec = () => setStep((s) => Math.max(0, s - 1));
-
 	//sync power and fan speed
 	useEffect(() => {
 		if (step === 0 && power) {
@@ -131,6 +121,13 @@ export default function Body({ power, setPower }) {
 		}
 	}, [power]);
 
+	//api call
+	useEffect(() => {
+		if (power && mode === "manual") {
+			sendFanSpeed(step);
+		}
+	}, [step]);
+	console.log(power);
 	return (
 		<View style={styles.container}>
 			{/* Arc progress */}

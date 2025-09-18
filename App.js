@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import Home from "./Home";
 import Topbar from "./Topbar";
 import Body from "./Body";
+import { sendPower } from "./api/func";
 
 export default function App() {
 	const [poweredOn, setPoweredOn] = useState(false);
@@ -25,11 +26,17 @@ export default function App() {
 				) : (
 					<View style={styles.card}>
 						<Topbar
-							onPowerOff={() => {
+							onPowerOff={async () => {
 								setPoweredOn(false);
 								setShowHome(true);
+								try {
+									await sendPower();
+								} catch (err) {
+									console.error("sendPower failed:", err.message);
+								}
 							}}
 						/>
+
 						<Body power={poweredOn} setPower={() => setPoweredOn(true)} />
 					</View>
 				)}

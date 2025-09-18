@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // recommended for Expo projects
 
@@ -12,7 +12,9 @@ export default function Topbar({ onPowerOff }) {
 
 			<TouchableOpacity
 				style={styles.powerOff}
-				onPress={onPowerOff}
+				onPress={() => {
+					onPowerOff();
+				}}
 				accessibilityLabel="Power Off"
 			>
 				<Ionicons name="power" size={22} color="#fff" />
