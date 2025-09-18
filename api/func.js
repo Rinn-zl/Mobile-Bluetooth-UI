@@ -31,13 +31,44 @@ export const sendPower = async () => {
     }
 };
 
-//get temp
+
+//servo toggle
+export const sendServoToggle = async (action) => {
+    try {
+        const res = await api.post("/api/servo", { action }); // "on" or "off"
+        return res.data.servo;
+    } catch (err) {
+        console.error("Failed to toggle servo:", err.message);
+    }
+};
+
+//timer
+export const sendTimer = async (hours, minutes) => {
+    try {
+        const res = await api.post("/api/timer", { hours, minutes });
+        return res.data;
+    } catch (err) {
+        console.error("Failed to set timer:", err.message);
+        return { status: "error", message: err.message };
+    }
+};
+//temperature
 export const getTemperature = async () => {
     try {
         const res = await api.get("/api/temperature");
         return res.data.temperature;
     } catch (err) {
         console.error("Failed to fetch temperature:", err.message);
+        return null;
+    }
+};
+
+export const sendTemperature = async (temperature) => {
+    try {
+        const res = await api.post("/api/temperature", { temperature });
+        return res.data.temperature;
+    } catch (err) {
+        console.error("Failed to send temperature:", err.message);
         return null;
     }
 };

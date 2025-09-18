@@ -3,7 +3,13 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { TextInput } from "react-native";
-import { sendFanSpeed, sendMode} from "./api/func";
+import {
+	sendFanSpeed,
+	sendMode,
+	sendServoToggle,
+	sendTimer,
+	getTemperature,
+} from "./api/func";
 
 export default function Body({ power, setPower }) {
 	const [step, setStep] = useState(0); // 0 → 1 → 2 → 3
@@ -15,14 +21,28 @@ export default function Body({ power, setPower }) {
 
 	//spin toggle
 	const [spin, setSpin] = useState(false);
-	const toggleSpin = () => {
+	const toggleSpin = async () => {
 		if (!power) return;
-		setSpin((prev) => !prev);
+		const newSpin = !spin;
+		setSpin(newSpin);
+		await sendServoToggle(newSpin ? "on" : "off");
 	};
 
 	//timer
 	const [hours, setHours] = useState(0);
 	const [minutes, setMinutes] = useState(0);
+
+	//temperatue call
+	useEffect(() => {
+		const interval = setInterval(async () => {
+			const temp = await getTemperature();
+			if (typeof temp === "number") {
+				setTemperature(temp);
+			}
+		}, 5000); // every 5 seconds
+
+		return () => clearInterval(interval);
+	}, []);
 
 	//status
 	const [hvacAction, setHvacAction] = useState("idle"); // "heating", "cooling", or "idle"
@@ -240,6 +260,28 @@ export default function Body({ power, setPower }) {
 				/>
 				<Text style={styles.timerLabel}>min</Text>
 			</View>
+			<TouchableOpacity
+				onPress={async () => {
+					if (!power || mode !== "manual") return;
+					const result = await sendTimer(hours, minutes);
+					console.log(result.message);
+				}}
+				disabled={!power || mode !== "manual"}
+				style={[
+					{
+						backgroundColor: "#2563eb",
+						paddingVertical: 10,
+						paddingHorizontal: 24,
+						borderRadius: 999,
+						marginTop: 12,
+					},
+					(!power || mode !== "manual") && styles.disabledBtn,
+				]}
+			>
+				<Text style={{ color: "#fff", fontWeight: "600", textAlign: "center" }}>
+					Start Timer
+				</Text>
+			</TouchableOpacity>
 			<Text style={styles.statusNote}>{statusMessage}</Text>
 		</View>
 	);

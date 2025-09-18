@@ -5,7 +5,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 export default function Home({ onPowerOn }) {
 	return (
 		<View style={styles.container}>
-			<Text style={styles.title}>SMART FAN CONTROLLER</Text>
+			<Text style={styles.title}>FAN CONTROLLER</Text>
 			<Text style={styles.subtitle}>Press power to start</Text>
 
 			{/* Fan Icon */}
